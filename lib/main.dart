@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'splash_screen.dart';
 import 'package:travel_app/screens/welcome_screen.dart';
+import 'package:travel_app/screens/signin_screen.dart';
+import 'package:travel_app/screens/signup_screen.dart';
+import 'package:travel_app/screens/home_screen.dart';
 import 'package:travel_app/theme/theme.dart';
-
+// import 'package:travel_app/widgets/welcome_button.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -14,9 +16,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Travel App',
       theme: lightMode,
-      home: const WelcomeScreen(),   
+      initialRoute: '/welcome', // Use simple route names
+      routes: {
+        '/welcome': (context) => const WelcomeScreen(),
+        '/signin': (context) => const SignInScreen(),
+        '/signup': (context) => const SignUpScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }

@@ -60,3 +60,11 @@ ThemeData darkMode = ThemeData(
   brightness: Brightness.dark,
   colorScheme: darkColorScheme,
 );
+// import 'package:flutter/material.dart';
+
+final lightColorSchemeHome = ColorScheme.light(
+  primary: Colors.blue.shade800,
+  secondary: Colors.blue.shade600,
+  background: Colors.white,
+  // Add other colors as needed
+);

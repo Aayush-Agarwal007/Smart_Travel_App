@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "425670325633",
+    "project_id": "smart-travel-app-573a8",
+    "storage_bucket": "smart-travel-app-573a8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425670325633:android:0f7983974ccd6078f8a480",
+        "android_client_info": {
+          "package_name": "com.company.SmartTravelApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2VA90pc0TE-i9XZnoWt0AbGspoiwnGOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
