@@ -33,7 +33,7 @@ class WelcomeScreen extends StatelessWidget {
                             )),
                         TextSpan(
                             text:
-                                '\nNew memories await—shall we begin?',
+                                '\nNew memories awaitâ€”shall we begin?',
                             style: TextStyle(
                               fontSize: 18,
                               // height: 0,

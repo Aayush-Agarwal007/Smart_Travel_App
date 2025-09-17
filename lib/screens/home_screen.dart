@@ -1,16 +1,19 @@
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:travel_app/theme/theme.dart';
+import 'package:travel_app/screens/ai_chat_screen.dart';
+
 class Place {
   final String id;
   final String name;
-  final String type; // e.g., "city", "attraction", "landmark"
+  final String type;
   final String country;
   final String imageUrl;
   final String description;
+  final double rating;
+  final int reviews;
 
   Place({
     required this.id,
@@ -19,9 +22,10 @@ class Place {
     required this.country,
     required this.imageUrl,
     required this.description,
+    this.rating = 4.5,
+    this.reviews = 0,
   });
 
-  // Helper method to create from JSON
   factory Place.fromJson(Map<String, dynamic> json) {
     return Place(
       id: json['id'],
@@ -30,9 +34,12 @@ class Place {
       country: json['country'],
       imageUrl: json['imageUrl'],
       description: json['description'],
+      rating: json['rating']?.toDouble() ?? 4.5,
+      reviews: json['reviews'] ?? 0,
     );
   }
 }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -40,117 +47,356 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _showPlaceDetails(Place place) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
             ),
-            const SizedBox(height: 16),
-            Text(
-              place.name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "${place.type} in ${place.country}",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  place.imageUrl,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              place.description,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Navigate to full details screen
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: lightColorScheme.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text('View Full Details'),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-Widget _buildSearchResults() {
-  if (!_isSearching) {
-    return const SizedBox.shrink();
-  }
-
-  return Expanded(
-    child: ListView.builder(
-      itemCount: _filteredPlaces.length,
-      itemBuilder: (context, index) {
-        final place = _filteredPlaces[index];
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(place.imageUrl),
           ),
-          title: Text(place.name),
-          subtitle: Text("${place.type} • ${place.country}"),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {
-            // Navigate to place details screen
-            _showPlaceDetails(place);
-          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      place.name,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C3E50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3498DB).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: Color(0xFFE74C3C), size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          place.rating.toString(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C3E50),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.location_on, color: Colors.grey[600], size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${place.type} in ${place.country}",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                height: 220,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    children: [
+                      Image.network(
+                        place.imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.3),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "About ${place.name}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: Text(
+                  place.description,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF34495E),
+                    height: 1.6,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                height: 55,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3498DB).withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Explore More Details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
-    ),
-  );
-}
+    );
+  }
+
+  Widget _buildSearchResults() {
+    if (!_isSearching) {
+      return const SizedBox.shrink();
+    }
+
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _filteredPlaces.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          final place = _filteredPlaces[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(15),
+              leading: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    place.imageUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              title: Text(
+                place.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 5),
+                  Text(
+                    "${place.type} • ${place.country}",
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Color(0xFFE74C3C), size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        place.rating.toString(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              trailing: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3498DB).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Color(0xFF3498DB),
+                ),
+              ),
+              onTap: () {
+                _showPlaceDetails(place);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   String _currentCity = "Your City";
   final TextEditingController _searchController = TextEditingController();
-  List<String> popularDestinations = [
-    "Dubai", "Thailand", "Malaysia", "Sri Lanka", "Singapore",
-    "Paris", "Bali", "Tokyo", "New York", "London"
+  
+  final List<Map<String, dynamic>> popularDestinations = [
+    {
+      'name': 'Dubai',
+      'image': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.location_city,
+      'color': const Color(0xFFE74C3C),
+    },
+    {
+      'name': 'Thailand',
+      'image': 'https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.temple_buddhist,
+      'color': const Color(0xFF2ECC71),
+    },
+    {
+      'name': 'Malaysia',
+      'image': 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.mosque,
+      'color': const Color(0xFF9B59B6),
+    },
+    {
+      'name': 'Sri Lanka',
+      'image': 'https://images.unsplash.com/photo-1566552881560-0be862a7d2d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.landscape,
+      'color': const Color(0xFFE67E22),
+    },
+    {
+      'name': 'Singapore',
+      'image': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.apartment,
+      'color': const Color(0xFF1ABC9C),
+    },
+    {
+      'name': 'Paris',
+      'image': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.tour,
+      'color': const Color(0xFFF39C12),
+    },
+    {
+      'name': 'Bali',
+      'image': 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.beach_access,
+      'color': const Color(0xFF3498DB),
+    },
+    {
+      'name': 'Tokyo',
+      'image': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.corporate_fare,
+      'color': const Color(0xFFE91E63),
+    },
   ];
 
   int _currentIndex = 0;
   bool _isLocationLoading = false;
+  late AnimationController _animationController;
 
-  // ADD THESE VARIABLES FOR SEARCH FUNCTIONALITY:
   final List<Place> _allPlaces = [
     Place(
       id: '1',
@@ -158,7 +404,9 @@ Widget _buildSearchResults() {
       type: 'city',
       country: 'United Arab Emirates',
       imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'A vibrant city known for luxury shopping, ultramodern architecture and a lively nightlife scene.',
+      description: 'A vibrant city known for luxury shopping, ultramodern architecture and a lively nightlife scene. Experience the world\'s tallest building, incredible shopping malls, and pristine beaches.',
+      rating: 4.7,
+      reviews: 2341,
     ),
     Place(
       id: '2',
@@ -166,7 +414,9 @@ Widget _buildSearchResults() {
       type: 'country',
       country: 'Thailand',
       imageUrl: 'https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'Known for tropical beaches, opulent royal palaces, ancient ruins and ornate temples.',
+      description: 'Known for tropical beaches, opulent royal palaces, ancient ruins and ornate temples. Discover the perfect blend of culture, adventure, and relaxation.',
+      rating: 4.6,
+      reviews: 1876,
     ),
     Place(
       id: '3',
@@ -174,32 +424,50 @@ Widget _buildSearchResults() {
       type: 'country',
       country: 'Malaysia',
       imageUrl: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'A Southeast Asian country occupying parts of the Malay Peninsula and the island of Borneo.',
+      description: 'A Southeast Asian country occupying parts of the Malay Peninsula and the island of Borneo. Experience diverse cultures, stunning nature, and modern cities.',
+      rating: 4.5,
+      reviews: 1543,
     ),
-    // Add more places as needed...
+    Place(
+      id: '4',
+      name: 'Singapore',
+      type: 'city',
+      country: 'Singapore',
+      imageUrl: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'A modern city-state known for its multicultural population, incredible food scene, and futuristic architecture. The perfect urban getaway.',
+      rating: 4.8,
+      reviews: 3021,
+    ),
   ];
 
   List<Place> _filteredPlaces = [];
   bool _isSearching = false;
 
-@override
-void initState() {
-  super.initState();
-  _checkLocationStatus();
-   _filteredPlaces = _allPlaces; // Initially show all places
-}
+  @override
+  void initState() {
+    super.initState();
+    _checkLocationStatus();
+    _filteredPlaces = _allPlaces;
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   Future<void> _checkLocationStatus() async {
-    // Check if location services are enabled
     bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
     
     if (!isLocationServiceEnabled) {
-      // Show dialog to enable location services
       _showLocationServiceDialog();
       return;
     }
     
-    // If services are enabled, request permission
     _requestLocationPermission();
   }
 
@@ -214,7 +482,12 @@ void initState() {
       await _getCurrentLocation();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permission denied')),
+        SnackBar(
+          content: const Text('Location permission denied'),
+          backgroundColor: const Color(0xFFE74C3C),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     }
     
@@ -242,7 +515,12 @@ void initState() {
     } catch (e) {
       print("Error getting location: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get location')),
+        SnackBar(
+          content: const Text('Failed to get location'),
+          backgroundColor: const Color(0xFFE74C3C),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     }
   }
@@ -252,19 +530,29 @@ void initState() {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Location Services Disabled"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: const Text(
+            "Location Services Disabled",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: const Text("Please enable location services to use this feature."),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text("Cancel"),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
                 Geolocator.openLocationSettings();
               },
-              child: const Text("Enable"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3498DB),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text("Enable", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -273,408 +561,738 @@ void initState() {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: lightColorScheme.primary,
-      foregroundColor: Colors.white,
-      title: Row(
-        children: [
-          // Your City Button with improved design
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: _isLocationLoading
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : TextButton.icon(
-                    onPressed: _checkLocationStatus,
-                    icon: const Icon(Icons.location_on, size: 18),
-                    label: Text(
-                      _currentCity,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: lightColorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                  ),
-          ),
-          const Spacer(),
-          // Hamburger Menu
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
-          ),
-        ],
-      ),
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.3),
-    ),
-    body: Column(
-      children: [
-        // Search Bar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search for destinations or attractions...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _isSearching
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: _clearSearch,
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-              ),
-              onChanged: _searchPlaces, // This will trigger search as user types
-              onSubmitted: (value) {
-                _searchPlaces(value);
-              },
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
         ),
-        
-        // Show search results if searching, otherwise show normal content
-        if (_isSearching) 
-          _buildSearchResults()
-        else 
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Popular Destinations Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Popular Destinations",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "See all",
-                            style: TextStyle(color: lightColorScheme.primary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  
-                  // Horizontal list of popular destinations
-                  SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: popularDestinations.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            // Search for this destination when tapped
-                            _searchController.text = popularDestinations[index];
-                            _searchPlaces(popularDestinations[index]);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundColor: lightColorScheme.primary.withOpacity(0.1),
-                                  child: Icon(
-                                    Icons.location_city,
-                                    size: 24,
-                                    color: lightColorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  popularDestinations[index],
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Plan Detailed Itineraries Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Plan Detailed Itineraries",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              "Organize your day-to-day travel activities and create perfect travel plans.",
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                            const SizedBox(height: 15),
-                            ElevatedButton(
-                              onPressed: () {
-                                // Navigate to itinerary planner
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: lightColorScheme.primary,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              ),
-                              child: const Text("Create Itinerary"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+        title: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
+              child: _isLocationLoading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : TextButton.icon(
+                      onPressed: _checkLocationStatus,
+                      icon: const Icon(Icons.location_on, size: 18, color: Color(0xFF3498DB)),
+                      label: Text(
+                        _currentCity,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF2C3E50),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    ),
             ),
-          ),
-      ],
-    ),
-    
-    // Bottom Navigation Bar with improved design
-    bottomNavigationBar: Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+            const Spacer(),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-      child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          _navigateToSection(index);
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: lightColorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome_outlined),
-            activeIcon: Icon(Icons.auto_awesome),
-            label: 'AI',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emergency_outlined),
-            activeIcon: Icon(Icons.emergency),
-            label: 'SOS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.near_me_outlined),
-            activeIcon: Icon(Icons.near_me),
-            label: 'Nearby',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    ),
-    
-    // Hamburger Menu Drawer
-    endDrawer: Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      body: Column(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: lightColorScheme.primary,
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 30, color: Colors.blue),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 25),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Travel App',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Where do you want to go? ✈️',
+                    hintStyle: TextStyle(color: Colors.grey[600]),
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF3498DB)),
+                    suffixIcon: _isSearching
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Color(0xFF3498DB)),
+                            onPressed: _clearSearch,
+                          )
+                        : const Icon(Icons.mic, color: Color(0xFF3498DB)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  ),
+                  onChanged: _searchPlaces,
+                  onSubmitted: (value) {
+                    _searchPlaces(value);
+                  },
+                ),
+              ),
+            ),
+          ),
+          
+          if (_isSearching) 
+            _buildSearchResults()
+          else 
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    
+                    // Popular Destinations Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "✨ Popular Destinations",
+                            style: TextStyle(
+                              fontSize: 20, 
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3498DB).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: InkWell(
+                              onTap: () {},
+                              child: const Text(
+                                "See all",
+                                style: TextStyle(
+                                  color: Color(0xFF3498DB),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    
+                    SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: popularDestinations.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemBuilder: (context, index) {
+                          final destination = popularDestinations[index];
+                          return GestureDetector(
+                            onTap: () {
+                              _searchController.text = destination['name'];
+                              _searchPlaces(destination['name']);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 15),
+                              width: 120,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Stack(
+                                  children: [
+                                    Image.network(
+                                      destination['image'],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.black.withOpacity(0.7),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 15,
+                                      left: 15,
+                                      right: 15,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: destination['color'].withOpacity(0.9),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Icon(
+                                              destination['icon'],
+                                              size: 20,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            destination['name'],
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Plan Detailed Itineraries Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF667eea).withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(25.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: const Icon(
+                                      Icons.map_outlined,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  const Expanded(
+                                    child: Text(
+                                      "🗺️ Plan Detailed Itineraries",
+                                      style: TextStyle(
+                                        fontSize: 20, 
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 15),
+                              const Text(
+                                "Organize your day-to-day travel activities and create perfect travel plans with our AI-powered itinerary builder.",
+                                style: TextStyle(
+                                  fontSize: 15, 
+                                  color: Colors.white70,
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Navigate to itinerary planner
+                                  },
+                                  icon: const Icon(Icons.add_location_alt, color: Color(0xFF667eea)),
+                                  label: const Text(
+                                    "Create Itinerary",
+                                    style: TextStyle(
+                                      color: Color(0xFF667eea),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Featured Experiences Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "🌟 Featured Experiences",
+                            style: TextStyle(
+                              fontSize: 20, 
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 140,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFE74C3C), Color(0xFFC0392B)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFE74C3C).withOpacity(0.3),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(
+                                            Icons.restaurant,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                        const Text(
+                                          "Food\nTours",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Container(
+                                  height: 140,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF2ECC71).withOpacity(0.3),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(
+                                            Icons.landscape,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                        const Text(
+                                          "Adventure\nTrips",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+      
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 15,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+              _navigateToSection(index);
+            },
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: const Color(0xFF3498DB),
+            unselectedItemColor: Colors.grey[400],
+            showSelectedLabels: true,
+            showUnselectedLabels: false,
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.auto_awesome_outlined),
+                activeIcon: Icon(Icons.auto_awesome),
+                label: 'AI Assistant',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.emergency_outlined),
+                activeIcon: Icon(Icons.emergency),
+                label: 'SOS',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.near_me_outlined),
+                activeIcon: Icon(Icons.near_me),
+                label: 'Nearby',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outlined),
+                activeIcon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
+      ),
+      
+      endDrawer: Container(
+        width: MediaQuery.of(context).size.width * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25),
+            bottomLeft: Radius.circular(25),
+          ),
+        ),
+        child: Drawer(
+          backgroundColor: Colors.transparent,
+          child: Column(
+            children: [
+              Container(
+                height: 200,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25),
                   ),
                 ),
-              ],
-            ),
+                child: const Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CircleAvatar(
+                        radius: 35,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 35, color: Color(0xFF3498DB)),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        'Travel Explorer',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Discover the world with us',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  children: [
+                    _buildDrawerItem(Icons.explore, 'Discover Places', Colors.orange, () {}),
+                    _buildDrawerItem(Icons.favorite, 'My Favorites', Colors.red, () {}),
+                    _buildDrawerItem(Icons.history, 'Travel History', Colors.purple, () {}),
+                    _buildDrawerItem(Icons.bookmark, 'Saved Trips', Colors.green, () {}),
+                    _buildDrawerItem(Icons.language, 'Languages', Colors.blue, () {}),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Divider(),
+                    ),
+                    _buildDrawerItem(Icons.settings, 'Settings', Colors.grey, () {}),
+                    _buildDrawerItem(Icons.help_outline, 'Help & Support', Colors.cyan, () {}),
+                    _buildDrawerItem(Icons.info_outline, 'About Us', Colors.indigo, () {}),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Divider(),
+                    ),
+                    _buildDrawerItem(Icons.logout, 'Logout', Colors.red, () {}),
+                  ],
+                ),
+              ),
+            ],
           ),
-          _buildDrawerItem(Icons.explore, 'Discover', () {}),
-          _buildDrawerItem(Icons.favorite, 'Favorites', () {}),
-          _buildDrawerItem(Icons.history, 'Travel History', () {}),
-          _buildDrawerItem(Icons.bookmark, 'Bookmarks', () {}),
-          const Divider(),
-          _buildDrawerItem(Icons.settings, 'Settings', () {}),
-          _buildDrawerItem(Icons.help, 'Help & Support', () {}),
-          _buildDrawerItem(Icons.info, 'About', () {}),
-          const Divider(),
-          _buildDrawerItem(Icons.exit_to_app, 'Logout', () {}),
-        ],
+        ),
       ),
-    ),
-  );
-}
-
-  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey[700]),
-      title: Text(title, style: const TextStyle(fontSize: 16)),
-      onTap: onTap,
     );
   }
 
- void _searchPlaces(String query) {
-  if (query.isEmpty) {
+  Widget _buildDrawerItem(IconData icon, String title, Color iconColor, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey[50],
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        title: Text(
+          title, 
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF2C3E50),
+          ),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios, 
+          size: 16, 
+          color: Colors.grey,
+        ),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
+    );
+  }
+
+  void _searchPlaces(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _isSearching = false;
+        _filteredPlaces = _allPlaces;
+      });
+      return;
+    }
+
     setState(() {
+      _isSearching = true;
+    });
+
+    final results = _allPlaces.where((place) {
+      final name = place.name.toLowerCase();
+      final country = place.country.toLowerCase();
+      final type = place.type.toLowerCase();
+      final searchLower = query.toLowerCase();
+
+      return name.contains(searchLower) ||
+          country.contains(searchLower) ||
+          type.contains(searchLower);
+    }).toList();
+
+    setState(() {
+      _filteredPlaces = results;
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
       _isSearching = false;
       _filteredPlaces = _allPlaces;
     });
-    return;
   }
-
-  setState(() {
-    _isSearching = true;
-  });
-
-  // Filter places based on the search query
-  final results = _allPlaces.where((place) {
-    final name = place.name.toLowerCase();
-    final country = place.country.toLowerCase();
-    final type = place.type.toLowerCase();
-    final searchLower = query.toLowerCase();
-
-    return name.contains(searchLower) ||
-        country.contains(searchLower) ||
-        type.contains(searchLower);
-  }).toList();
-
-  setState(() {
-    _filteredPlaces = results;
-  });
-}
-
-void _clearSearch() {
-  setState(() {
-    _searchController.clear();
-    _isSearching = false;
-    _filteredPlaces = _allPlaces;
-  });
-}
 
   void _navigateToSection(int index) {
     switch (index) {
       case 0: // Home
-        // Already on home
         break;
       case 1: // AI
-        // Navigate to AI section
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()));
         break;
       case 2: // SOS
-        // Navigate to SOS/emergency section
         break;
       case 3: // Nearby
-        // Navigate to nearby places
         break;
       case 4: // Profile
-        // Navigate to profile
         break;
     }
   }
