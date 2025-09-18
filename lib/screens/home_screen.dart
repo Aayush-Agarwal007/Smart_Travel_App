@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:travel_app/screens/sos.dart'; //sos
 import 'package:travel_app/theme/theme.dart';
 import 'package:travel_app/screens/ai_chat_screen.dart';
+import 'package:travel_app/screens/NearbyScreen.dart'; // Add this import
 
 class Place {
   final String id;
@@ -91,7 +93,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF3498DB).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -99,7 +104,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFE74C3C), size: 16),
+                        const Icon(
+                          Icons.star,
+                          color: Color(0xFFE74C3C),
+                          size: 16,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           place.rating.toString(),
@@ -275,10 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    place.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(place.imageUrl, fit: BoxFit.cover),
                 ),
               ),
               title: Text(
@@ -295,15 +301,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const SizedBox(height: 5),
                   Text(
                     "${place.type} • ${place.country}",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFE74C3C), size: 16),
+                      const Icon(
+                        Icons.star,
+                        color: Color(0xFFE74C3C),
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         place.rating.toString(),
@@ -344,51 +351,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   
   final List<Map<String, dynamic>> popularDestinations = [
     {
-      'name': 'Dubai',
-      'image': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.location_city,
+      'name': 'Taj Mahal',
+      'image': 'https://images.unsplash.com/photo-1564507592333-c60657eea523?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.account_balance,
       'color': const Color(0xFFE74C3C),
     },
     {
-      'name': 'Thailand',
-      'image': 'https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.temple_buddhist,
+      'name': 'Kerala',
+      'image': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.water,
       'color': const Color(0xFF2ECC71),
     },
     {
-      'name': 'Malaysia',
-      'image': 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.mosque,
+      'name': 'Rajasthan',
+      'image': 'https://images.unsplash.com/photo-1477587458883-47145ed94245?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.castle,
       'color': const Color(0xFF9B59B6),
     },
     {
-      'name': 'Sri Lanka',
-      'image': 'https://images.unsplash.com/photo-1566552881560-0be862a7d2d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.landscape,
+      'name': 'Goa',
+      'image': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.beach_access,
       'color': const Color(0xFFE67E22),
     },
     {
-      'name': 'Singapore',
-      'image': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.apartment,
+      'name': 'Kashmir',
+      'image': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.landscape,
       'color': const Color(0xFF1ABC9C),
     },
     {
-      'name': 'Paris',
-      'image': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.tour,
+      'name': 'Manali',
+      'image': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.terrain,
       'color': const Color(0xFFF39C12),
     },
     {
-      'name': 'Bali',
-      'image': 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.beach_access,
+      'name': 'Ladakh',
+      'image': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.hiking,
       'color': const Color(0xFF3498DB),
     },
     {
-      'name': 'Tokyo',
-      'image': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      'icon': Icons.corporate_fare,
+      'name': 'Mysore',
+      'image': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      'icon': Icons.temple_hindu,
       'color': const Color(0xFFE91E63),
     },
   ];
@@ -400,45 +407,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<Place> _allPlaces = [
     Place(
       id: '1',
-      name: 'Dubai',
-      type: 'city',
-      country: 'United Arab Emirates',
-      imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'A vibrant city known for luxury shopping, ultramodern architecture and a lively nightlife scene. Experience the world\'s tallest building, incredible shopping malls, and pristine beaches.',
-      rating: 4.7,
-      reviews: 2341,
+      name: 'Taj Mahal',
+      type: 'monument',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'An ivory-white marble mausoleum and UNESCO World Heritage Site in Agra. Built by Mughal emperor Shah Jahan as a tomb for his wife Mumtaz Mahal, it\'s considered one of the finest examples of Mughal architecture.',
+      rating: 4.8,
+      reviews: 45621,
     ),
     Place(
       id: '2',
-      name: 'Thailand',
-      type: 'country',
-      country: 'Thailand',
-      imageUrl: 'https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'Known for tropical beaches, opulent royal palaces, ancient ruins and ornate temples. Discover the perfect blend of culture, adventure, and relaxation.',
-      rating: 4.6,
-      reviews: 1876,
+      name: 'Kerala Backwaters',
+      type: 'natural attraction',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'A network of brackish lagoons and lakes along the Arabian Sea coast of Kerala. Experience traditional houseboats, coconut palm fringed canals, and pristine natural beauty in God\'s Own Country.',
+      rating: 4.7,
+      reviews: 12876,
     ),
     Place(
       id: '3',
-      name: 'Malaysia',
-      type: 'country',
-      country: 'Malaysia',
-      imageUrl: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'A Southeast Asian country occupying parts of the Malay Peninsula and the island of Borneo. Experience diverse cultures, stunning nature, and modern cities.',
-      rating: 4.5,
-      reviews: 1543,
+      name: 'Rajasthan Palaces',
+      type: 'cultural heritage',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'Explore the royal heritage of Rajasthan with magnificent palaces, forts, and desert landscapes. Visit Jaipur\'s Pink City, Udaipur\'s lakes, and experience the Thar Desert.',
+      rating: 4.6,
+      reviews: 8943,
     ),
     Place(
       id: '4',
-      name: 'Singapore',
-      type: 'city',
-      country: 'Singapore',
-      imageUrl: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      description: 'A modern city-state known for its multicultural population, incredible food scene, and futuristic architecture. The perfect urban getaway.',
-      rating: 4.8,
-      reviews: 3021,
+      name: 'Goa Beaches',
+      type: 'beach destination',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'Famous for its pristine beaches, Portuguese colonial architecture, and vibrant nightlife. Enjoy water sports, beach parties, and delicious seafood in this tropical paradise.',
+      rating: 4.5,
+      reviews: 15432,
+    ),
+    Place(
+      id: '5',
+      name: 'Kashmir Valley',
+      type: 'hill station',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'Known as "Paradise on Earth", Kashmir offers breathtaking mountain scenery, serene lakes, and beautiful gardens. Experience Dal Lake houseboats and stunning Himalayan views.',
+      rating: 4.9,
+      reviews: 7821,
+    ),
+    Place(
+      id: '6',
+      name: 'Manali',
+      type: 'hill station',
+      country: 'India',
+      imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+      description: 'A popular hill station in Himachal Pradesh offering adventure sports, apple orchards, and snow-capped mountain views. Perfect for trekking, paragliding, and river rafting.',
+      rating: 4.4,
+      reviews: 9876,
     ),
   ];
+
 
   List<Place> _filteredPlaces = [];
   bool _isSearching = false;
@@ -462,12 +490,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _checkLocationStatus() async {
     bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
-    
+
     if (!isLocationServiceEnabled) {
       _showLocationServiceDialog();
       return;
     }
-    
+
     _requestLocationPermission();
   }
 
@@ -475,9 +503,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isLocationLoading = true;
     });
-    
+
     final status = await Permission.location.request();
-    
+
     if (status.isGranted) {
       await _getCurrentLocation();
     } else {
@@ -486,11 +514,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           content: const Text('Location permission denied'),
           backgroundColor: const Color(0xFFE74C3C),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }
-    
+
     setState(() {
       _isLocationLoading = false;
     });
@@ -501,12 +531,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      
+
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
-      
+
       if (placemarks.isNotEmpty) {
         setState(() {
           _currentCity = placemarks[0].locality ?? "Your City";
@@ -519,7 +549,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           content: const Text('Failed to get location'),
           backgroundColor: const Color(0xFFE74C3C),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }
@@ -530,12 +562,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           title: const Text(
             "Location Services Disabled",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: const Text("Please enable location services to use this feature."),
+          content: const Text(
+            "Please enable location services to use this feature.",
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -552,7 +588,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text("Enable", style: TextStyle(color: Colors.white)),
+              child: const Text(
+                "Enable",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -567,6 +606,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -592,7 +632,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               child: _isLocationLoading
                   ? const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: SizedBox(
                         width: 20,
                         height: 20,
@@ -601,7 +644,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     )
                   : TextButton.icon(
                       onPressed: _checkLocationStatus,
-                      icon: const Icon(Icons.location_on, size: 18, color: Color(0xFF3498DB)),
+                      icon: const Icon(
+                        Icons.location_on,
+                        size: 18,
+                        color: Color(0xFF3498DB),
+                      ),
                       label: Text(
                         _currentCity,
                         style: const TextStyle(
@@ -611,7 +658,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
             ),
@@ -658,10 +708,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   decoration: InputDecoration(
                     hintText: 'Where do you want to go? ✈️',
                     hintStyle: TextStyle(color: Colors.grey[600]),
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF3498DB)),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Color(0xFF3498DB),
+                    ),
                     suffixIcon: _isSearching
                         ? IconButton(
-                            icon: const Icon(Icons.clear, color: Color(0xFF3498DB)),
+                            icon: const Icon(
+                              Icons.clear,
+                              color: Color(0xFF3498DB),
+                            ),
                             onPressed: _clearSearch,
                           )
                         : const Icon(Icons.mic, color: Color(0xFF3498DB)),
@@ -671,7 +727,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                   ),
                   onChanged: _searchPlaces,
                   onSubmitted: (value) {
@@ -681,16 +740,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
-          if (_isSearching) 
+
+          if (_isSearching)
             _buildSearchResults()
-          else 
+          else
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    
+
                     // Popular Destinations Section
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -700,13 +759,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const Text(
                             "✨ Popular Destinations",
                             style: TextStyle(
-                              fontSize: 20, 
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF2C3E50),
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF3498DB).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(15),
@@ -726,7 +788,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    
+
                     SizedBox(
                       height: 150,
                       child: ListView.builder(
@@ -784,8 +846,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                           Container(
                                             padding: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
-                                              color: destination['color'].withOpacity(0.9),
-                                              borderRadius: BorderRadius.circular(12),
+                                              color: destination['color']
+                                                  .withOpacity(0.9),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             child: Icon(
                                               destination['icon'],
@@ -816,9 +880,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 30),
-                    
+
                     // Plan Detailed Itineraries Section
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -862,7 +926,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     child: Text(
                                       "🗺️ Plan Detailed Itineraries",
                                       style: TextStyle(
-                                        fontSize: 20, 
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
@@ -874,7 +938,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               const Text(
                                 "Organize your day-to-day travel activities and create perfect travel plans with our AI-powered itinerary builder.",
                                 style: TextStyle(
-                                  fontSize: 15, 
+                                  fontSize: 15,
                                   color: Colors.white70,
                                   height: 1.5,
                                 ),
@@ -898,7 +962,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   onPressed: () {
                                     // Navigate to itinerary planner
                                   },
-                                  icon: const Icon(Icons.add_location_alt, color: Color(0xFF667eea)),
+                                  icon: const Icon(
+                                    Icons.add_location_alt,
+                                    color: Color(0xFF667eea),
+                                  ),
                                   label: const Text(
                                     "Create Itinerary",
                                     style: TextStyle(
@@ -921,9 +988,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 30),
-                    
+
                     // Featured Experiences Section
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -933,7 +1000,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const Text(
                             "🌟 Featured Experiences",
                             style: TextStyle(
-                              fontSize: 20, 
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF2C3E50),
                             ),
@@ -946,12 +1013,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   height: 140,
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFFE74C3C), Color(0xFFC0392B)],
+                                      colors: [
+                                        Color(0xFFE74C3C),
+                                        Color(0xFFC0392B),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFFE74C3C).withOpacity(0.3),
+                                        color: const Color(
+                                          0xFFE74C3C,
+                                        ).withOpacity(0.3),
                                         blurRadius: 10,
                                         offset: const Offset(0, 5),
                                       ),
@@ -960,14 +1032,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   child: Padding(
                                     padding: const EdgeInsets.all(20),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.restaurant,
@@ -994,12 +1072,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   height: 140,
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                                      colors: [
+                                        Color(0xFF2ECC71),
+                                        Color(0xFF27AE60),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF2ECC71).withOpacity(0.3),
+                                        color: const Color(
+                                          0xFF2ECC71,
+                                        ).withOpacity(0.3),
                                         blurRadius: 10,
                                         offset: const Offset(0, 5),
                                       ),
@@ -1008,14 +1091,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   child: Padding(
                                     padding: const EdgeInsets.all(20),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.landscape,
@@ -1041,7 +1130,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 30),
                   ],
                 ),
@@ -1049,7 +1138,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
         ],
       ),
-      
+
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -1119,7 +1208,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
-      
+
       endDrawer: Container(
         width: MediaQuery.of(context).size.width * 0.85,
         decoration: const BoxDecoration(
@@ -1141,9 +1230,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                  ),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(25)),
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(30),
@@ -1154,7 +1241,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       CircleAvatar(
                         radius: 35,
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 35, color: Color(0xFF3498DB)),
+                        child: Icon(
+                          Icons.person,
+                          size: 35,
+                          color: Color(0xFF3498DB),
+                        ),
                       ),
                       SizedBox(height: 15),
                       Text(
@@ -1167,10 +1258,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       Text(
                         'Discover the world with us',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
                       ),
                     ],
                   ),
@@ -1180,20 +1268,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: ListView(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildDrawerItem(Icons.explore, 'Discover Places', Colors.orange, () {}),
-                    _buildDrawerItem(Icons.favorite, 'My Favorites', Colors.red, () {}),
-                    _buildDrawerItem(Icons.history, 'Travel History', Colors.purple, () {}),
-                    _buildDrawerItem(Icons.bookmark, 'Saved Trips', Colors.green, () {}),
-                    _buildDrawerItem(Icons.language, 'Languages', Colors.blue, () {}),
+                    _buildDrawerItem(
+                      Icons.explore,
+                      'Discover Places',
+                      Colors.orange,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.favorite,
+                      'My Favorites',
+                      Colors.red,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.history,
+                      'Travel History',
+                      Colors.purple,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.bookmark,
+                      'Saved Trips',
+                      Colors.green,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.language,
+                      'Languages',
+                      Colors.blue,
+                      () {},
+                    ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       child: Divider(),
                     ),
-                    _buildDrawerItem(Icons.settings, 'Settings', Colors.grey, () {}),
-                    _buildDrawerItem(Icons.help_outline, 'Help & Support', Colors.cyan, () {}),
-                    _buildDrawerItem(Icons.info_outline, 'About Us', Colors.indigo, () {}),
+                    _buildDrawerItem(
+                      Icons.settings,
+                      'Settings',
+                      Colors.grey,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.help_outline,
+                      'Help & Support',
+                      Colors.cyan,
+                      () {},
+                    ),
+                    _buildDrawerItem(
+                      Icons.info_outline,
+                      'About Us',
+                      Colors.indigo,
+                      () {},
+                    ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       child: Divider(),
                     ),
                     _buildDrawerItem(Icons.logout, 'Logout', Colors.red, () {}),
@@ -1207,7 +1341,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, Color iconColor, VoidCallback onTap) {
+  Widget _buildDrawerItem(
+    IconData icon,
+    String title,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       decoration: BoxDecoration(
@@ -1224,7 +1363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Icon(icon, color: iconColor, size: 20),
         ),
         title: Text(
-          title, 
+          title,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -1232,14 +1371,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         trailing: const Icon(
-          Icons.arrow_forward_ios, 
-          size: 16, 
+          Icons.arrow_forward_ios,
+          size: 16,
           color: Colors.grey,
         ),
         onTap: onTap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
@@ -1286,11 +1423,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 0: // Home
         break;
       case 1: // AI
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()));
+        Navigator.pushNamed(context, '/ai-chat');
+
         break;
       case 2: // SOS
+        Navigator.pushNamed(context, '/sos');
         break;
       case 3: // Nearby
+      Navigator.pushNamed(context, '/nearby');
         break;
       case 4: // Profile
         break;

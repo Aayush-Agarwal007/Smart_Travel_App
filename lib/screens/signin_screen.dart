@@ -141,11 +141,13 @@ class _SignInScreenState extends State<SignInScreen> {
                             if (_formSignInKey.currentState!.validate() &&
                                 rememberPassword) {
                               // Navigate to home screen after successful sign-in
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (e) => const HomeScreen(),
                                 ),
+                                (Route<dynamic> route) =>
+                                    false, // This removes all previous routes
                               );
                             } else if (!rememberPassword) {
                               ScaffoldMessenger.of(context).showSnackBar(

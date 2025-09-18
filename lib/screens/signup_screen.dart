@@ -166,11 +166,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             if (_formSignupKey.currentState!.validate() &&
                                 agreePersonalData) {
                               // Navigate to home screen after successful sign-up
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (e) => const HomeScreen(),
                                 ),
+                                (Route<dynamic> route) =>
+                                    false, // This removes all previous routes
                               );
                             } else if (!agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(

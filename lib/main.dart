@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:travel_app/screens/ai_chat_screen.dart';
+import 'package:travel_app/screens/sos.dart';
 import 'package:travel_app/screens/welcome_screen.dart';
 import 'package:travel_app/screens/signin_screen.dart';
 import 'package:travel_app/screens/signup_screen.dart';
 import 'package:travel_app/screens/home_screen.dart';
 import 'package:travel_app/theme/theme.dart';
+import 'package:travel_app/screens/NearbyScreen.dart';
 // import 'package:travel_app/widgets/welcome_button.dart';
 void main() {
   runApp(const MyApp());
@@ -24,6 +27,10 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => const SignInScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => const HomeScreen(),
+        '/sos': (context) => SosScreen(),
+        '/ai-chat': (context) => AIChatScreen(),
+        '/nearby': (context) => NearbyPlacesScreen(),
+        
       },
     );
   }
